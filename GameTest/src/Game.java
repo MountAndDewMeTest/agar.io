@@ -13,7 +13,7 @@ public class Game {
 	public static ArrayList<Dot> dotsArrayList = new ArrayList<Dot>();
 	public static Player player;
 	public static Dot dot;
-	
+	//test mountanddewmtest
 	//Constants
 	public static final int MAX_DOTS = 400; //Maximum amount of dots allowed on the screen
 	public static final int DOT_RAD = 5; //Set constant for the radius of dots
