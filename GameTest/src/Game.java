@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -13,25 +14,22 @@ public class Game {
 	public static ArrayList<Dot> dotsArrayList = new ArrayList<Dot>();
 	public static Player player;
 	public static Dot dot;
-	public static Blob blob1, blob2, blob3;
-	
+
 	public static EZText namePos;
+	
 	//Constants
 	public static final int MAX_DOTS = 400; //Maximum amount of dots allowed on the screen
-	public static final int DOT_RAD = 5; //Set constant for the radius of dots
 
 	public static boolean running = true;
 
 	public static void main(String[] args) {
 		EZ.initialize(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-		player = new Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 5);
-
+		player = new Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+		namePos = inputSystem();
+		
 		drawBlobs();
-
-		namePos = inputName();
+		
 		while(running) {
-			
 			movePlayer();
 			//moveBlobs();
 			drawDots();
@@ -53,7 +51,7 @@ public class Game {
 			//Player-Blob Collision
 
 			//Player-Virus Collision
-			
+
 			updateNamePos();
 			EZ.refreshScreen();
 		}
@@ -66,7 +64,18 @@ public class Game {
 
 		player.move();
 	}
-	
+
+	private static void drawBlobs() {
+		Random rand = new Random();
+		for(int i = 0; i < 3; i++) {
+			int x = rand.nextInt(SCREEN_WIDTH);
+			int y = rand.nextInt(SCREEN_HEIGHT);
+			int rad = rand.nextInt(30) + 20;
+			Blob blob = new Blob(x, y, rad);
+			blobsArrayList.add(blob);
+		}
+	}
+
 	private static void moveBlobs() {
 		Random rand = new Random();
 
@@ -81,17 +90,6 @@ public class Game {
 		}
 	}
 
-	private static void drawBlobs() {
-		Random rand = new Random();
-		for(int i = 0; i < 3; i++) {
-			int x = rand.nextInt(SCREEN_WIDTH);
-			int y = rand.nextInt(SCREEN_HEIGHT);
-			int rad = rand.nextInt(30) + 20;
-			Blob blob = new Blob(x, y, rad);
-			blobsArrayList.add(blob);
-		}
-	}
-
 	private static void drawDots() {
 		Random rand = new Random();
 
@@ -99,48 +97,73 @@ public class Game {
 		if(dotsArrayList.size() < MAX_DOTS) {
 			int x = rand.nextInt(SCREEN_WIDTH);
 			int y = rand.nextInt(SCREEN_HEIGHT);
-			dot = new Dot(x, y, DOT_RAD);
+			dot = new Dot(x, y);
 			dotsArrayList.add(dot);
-
-			//			x = rand.nextInt(SCREEN_WIDTH);
-			//			y = rand.nextInt(SCREEN_HEIGHT);
-			//			for(int i = 0; i < dotsArrayList.size(); i++) {
-			//				while(dotsArrayList.get(i).isPointInElement(x, y)) {
-			//					x = rand.nextInt(SCREEN_WIDTH);
-			//					y = rand.nextInt(SCREEN_HEIGHT);
-			//				} 
-			//				dot = new Dot(x, y, rad);
-			//				dotsArrayList.add(dot);
-			//			}
-
 		}
-
 	}
 
-	private static EZText inputName() {
+	private static EZText inputSystem() {
 
-		Scanner s = new Scanner(System.in); //Create a scanner
+		Scanner s = new Scanner(System.in); 
 
-		System.out.println("Enter username: "); //Tells the player to enter a username in the console
-
+		System.out.println("Enter username: ");
 		String inputName;
-		inputName = s.next(); //Reads the next String that the user has entered and assigns it to 'name'
-
-		//We want to make sure that the name entered by the user is not too long that it goes off the Player's circle bounds, so we set a limit so that the length of 'name' is 4 or less characters
-		while(inputName.length() > 4) { //As long as the length of 'name' is longer than 4, keep making the user re-enter a different name
-			System.out.println("The name is too long! Must be 4 or less characters. Re-enter a new name:"); //Warn the user that the name they have entered is too long
-			inputName = s.next(); //Reads the next line of String that the user has entered and reassigns it to 'name'
+		inputName = s.next(); 
+		while(inputName.length() > 6) {
+			System.out.println("The name is too long! Must be 6 or less characters. Re-enter a new name:"); 
+			inputName = s.next(); 
 		}
-		s.close(); //Close 's' Scanner
-
-		EZText namePos = EZ.addText(player.getPlayerXCenter(), player.getPlayerYCenter(), "", Color.pink);
+		
+		System.out.println("Choose a color for the Player (case-sensitive): \n red (default) \n orange \n yellow \n green \n blue \n purple \n pink");
+		System.out.println("Color: ");
+		String inputColor;
+		inputColor = s.next();
+		
+		Color c;
+		switch(inputColor) {
+		case "red":
+			c = new Color(255, 0, 0);
+			Player.c = c;
+			break;
+		case "orange":
+			c = new Color(255, 50, 0);
+			Player.c = c;
+			break;
+		case "yellow":
+			c = new Color(255, 255, 0);
+			Player.c = c;
+			break;
+		case "green":
+			c = new Color(0, 200, 0);
+			Player.c = c;
+			break;
+		case "blue":
+			c = new Color(0, 100, 200);
+			Player.c = c;
+			break;
+		case "purple":
+			c = new Color(100, 0, 200);
+			Player.c = c;
+			break;
+		case "pink":
+			c = new Color(255, 50, 200);
+			Player.c = c;
+			break;
+		default:
+			c = new Color(255, 0, 0); 
+			Player.c = c;
+			break;
+		}
+		
+		s.close();
+		EZText namePos = EZ.addText(player.getPlayerXCenter(), player.getPlayerYCenter(), "", Color.black);
 		namePos.setMsg(inputName);
 		return namePos;
 	}
-	
+
 	private static void updateNamePos() {
 		namePos.translateTo(player.getPlayerXCenter(), player.getPlayerYCenter());
-		namePos.setFontSize((int)Player.mass / 2);
+		namePos.setFontSize((int)Player.mass / 4);
 		namePos.pullToFront();
 	}
 }
