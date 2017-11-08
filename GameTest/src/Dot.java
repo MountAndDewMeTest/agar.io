@@ -2,27 +2,31 @@ import java.awt.Color;
 import java.util.Random;
 
 public class Dot {
+	
+	private static int DOT_RAD = 5;
+	
 	public int x;
 	public int y;
-	public int rad;
+	
+	private int r, g, b;
 	public double mass;
-	public int r, g, b;
-	public Color c;
-	public EZCircle d;
+	
+	private Color c;
+	private EZCircle d;
 
-	public Dot(int x, int y, int rad) {
+	public Dot(int x, int y) {
 		this.x = x;
 		this.y = y;
-		this.rad = rad;
-		this.mass = rad * rad;
-
+		
+		mass = DOT_RAD * 2;
+		
 		if(isRGBNotWhite()) {
 			drawDot();
 		}
 	}
 
 	public void drawDot() {
-		d = EZ.addCircle(x, y, rad * 2, rad * 2, c, true);
+		d = EZ.addCircle(x, y, DOT_RAD * 2, DOT_RAD * 2, c, true);
 	}
 
 	private boolean isRGBNotWhite() {
