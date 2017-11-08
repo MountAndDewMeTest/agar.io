@@ -12,6 +12,7 @@ public class Game {
 	public static final int SCREEN_WIDTH = gd.getDisplayMode().getWidth();
 	public static final int SCREEN_HEIGHT = gd.getDisplayMode().getHeight();
 	
+	//Create Objects
 	public static ArrayList<Blob> blobsArrayList = new ArrayList<Blob>();
 	public static ArrayList<Dot> dotsArrayList = new ArrayList<Dot>();
 	public static Player player;
@@ -26,6 +27,7 @@ public class Game {
 
 	public static void main(String[] args) {
 		EZ.initialize(SCREEN_WIDTH, SCREEN_HEIGHT);
+		drawGrid();
 		player = new Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 		namePos = inputSystem();
 		
@@ -33,7 +35,6 @@ public class Game {
 		
 		while(running) {
 			movePlayer();
-			//moveBlobs();
 			drawDots();
 
 			//Player-Dot Collision
@@ -59,7 +60,7 @@ public class Game {
 		}
 
 	}
-
+	
 	private static void movePlayer() {
 		Player.desX = EZInteraction.getXMouse();
 		Player.desY = EZInteraction.getYMouse();
@@ -78,19 +79,19 @@ public class Game {
 		}
 	}
 
-	private static void moveBlobs() {
-		Random rand = new Random();
-
-		for(int i = 0; i < blobsArrayList.size(); i++) {
-			int x = rand.nextInt(SCREEN_WIDTH);
-			int y = rand.nextInt(SCREEN_HEIGHT);
-			Blob eachBlob;
-			eachBlob = blobsArrayList.get(i);
-			eachBlob.x = x;
-			eachBlob.y = y;
-			eachBlob.move();
-		}
-	}
+//	private static void moveBlobs() {
+//		Random rand = new Random();
+//
+//		for(int i = 0; i < blobsArrayList.size(); i++) {
+//			int x = rand.nextInt(SCREEN_WIDTH);
+//			int y = rand.nextInt(SCREEN_HEIGHT);
+//			Blob eachBlob;
+//			eachBlob = blobsArrayList.get(i);
+//			eachBlob.x = x;
+//			eachBlob.y = y;
+//			eachBlob.move();
+//		}
+//	}
 
 	private static void drawDots() {
 		Random rand = new Random();
@@ -103,7 +104,22 @@ public class Game {
 			dotsArrayList.add(dot);
 		}
 	}
-
+	
+	private static void drawGrid() {
+		int x = 0; 
+		int y = 0; 
+		Color c = new Color(0, 0, 0, 70);
+		
+		while (x < SCREEN_WIDTH) {
+			EZ.addLine(x, 0, x, SCREEN_HEIGHT, c, 1);
+			x += 20;
+		}
+		
+		while(y < SCREEN_HEIGHT) {
+			EZ.addLine(0, y, SCREEN_WIDTH, y, c, 1);
+			y += 20;
+		}
+	}
 	private static EZText inputSystem() {
 
 		Scanner s = new Scanner(System.in); 
@@ -158,7 +174,8 @@ public class Game {
 		}
 		
 		s.close();
-		EZText namePos = EZ.addText(player.getPlayerXCenter(), player.getPlayerYCenter(), "", Color.black);
+		
+		namePos = EZ.addText(player.getPlayerXCenter(), player.getPlayerYCenter(), "", Color.black);
 		namePos.setMsg(inputName);
 		return namePos;
 	}
