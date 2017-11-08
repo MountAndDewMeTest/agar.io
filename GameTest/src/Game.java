@@ -1,5 +1,6 @@
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -7,9 +8,10 @@ import java.util.Scanner;
 public class Game {
 
 	//Screen Width and Height
-	public static final int SCREEN_WIDTH = 1366;
-	public static final int SCREEN_HEIGHT = 768;
-
+	public static GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	public static final int SCREEN_WIDTH = gd.getDisplayMode().getWidth();
+	public static final int SCREEN_HEIGHT = gd.getDisplayMode().getHeight();
+	
 	public static ArrayList<Blob> blobsArrayList = new ArrayList<Blob>();
 	public static ArrayList<Dot> dotsArrayList = new ArrayList<Dot>();
 	public static Player player;
