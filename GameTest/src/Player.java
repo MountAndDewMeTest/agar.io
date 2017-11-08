@@ -1,32 +1,31 @@
 import java.awt.Color;
-import java.awt.MouseInfo;
 
 public class Player {
-
-	public static int x;
-	public static int y;
-	public static double rad;
-	public static double mass;
-	
 	public static final int BORDER = 8;
 	public static final int MAX_MASS = 150;
+	public static final int PLAYER_RAD = 5;
 	
+	public static int x;
+	public static int y;
+	
+	public static Color c;
+	public static double mass;
 	public static int desX = 0;
 	public static int desY = 0;
 
-	public EZCircle p;
-	public EZCircle pOutline; //Black border outline for the Player EZCircle
+	private EZCircle p;
+	private EZCircle pOutline; //Black border outline for the Player EZCircle
 	
-	public Player(int x, int y, int rad) {
+	public Player(int x, int y) {
 		Player.x = x;
 		Player.y = y;
-		Player.rad = rad;
-		Player.mass = rad;
 		
-		int width = rad * 2;
-		int height = rad * 2;
-		p = EZ.addCircle(x, y, width,  height,  Color.blue, true);
-		pOutline = EZ.addCircle(x, y, width + BORDER, height + BORDER, Color.black, true);
+		mass = PLAYER_RAD * 2;
+		
+		p = EZ.addCircle(x, y, PLAYER_RAD * 2,  PLAYER_RAD * 2,  c, true);
+		pOutline = EZ.addCircle(x, y, PLAYER_RAD * 2 + BORDER, PLAYER_RAD * 2 + BORDER, Color.black, true);
+		pOutline.pullToFront();
+		p.pullToFront();
 	}
 
 	public void move() {
@@ -37,10 +36,8 @@ public class Player {
 		float moveY = (float)(desY - y) / (float)mass;
 		
 		pOutline.translateBy(moveX, moveY);
-		pOutline.pullToFront();
+		p.setColor(c);
 		p.translateBy(moveX, moveY);
-		p.pullToFront();
-		
 	}
 	
 	public void updatePlayer() {
@@ -65,4 +62,5 @@ public class Player {
 	public boolean isPlayerPointInElement(int x, int y) {
 		return p.isPointInElement(x, y);
 	}
+	
 }
