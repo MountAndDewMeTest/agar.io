@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.MouseInfo;
 
 public class Player {
 
@@ -8,6 +9,7 @@ public class Player {
 	public static double mass;
 	
 	public static final int BORDER = 8;
+	public static final int MAX_MASS = 150;
 	
 	public static int desX = 0;
 	public static int desY = 0;
@@ -30,11 +32,12 @@ public class Player {
 	public void move() {
 		Player.x = p.getXCenter();
 		Player.y = p.getYCenter();
-
-		float moveX = (float)(desX - x) / 100;
-		float moveY = (float)(desY - y) / 100;
+		
+		float moveX = (float)(desX - x) / (float)mass;
+		float moveY = (float)(desY - y) / (float)mass;
 		
 		pOutline.translateBy(moveX, moveY);
+		pOutline.pullToFront();
 		p.translateBy(moveX, moveY);
 		p.pullToFront();
 		
@@ -45,6 +48,10 @@ public class Player {
 		p.setHeight((int)mass);
 		pOutline.setWidth((int)mass + BORDER);
 		pOutline.setHeight((int)mass + BORDER);
+		
+		if(Player.mass > MAX_MASS) {
+			Player.mass = MAX_MASS;
+		}
 	}
 	
 	public int getPlayerXCenter() {
@@ -58,8 +65,4 @@ public class Player {
 	public boolean isPlayerPointInElement(int x, int y) {
 		return p.isPointInElement(x, y);
 	}
-
-
-
-
 }
