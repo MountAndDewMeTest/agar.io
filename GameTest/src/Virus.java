@@ -8,7 +8,7 @@ public class Virus {
 	public int rad;
 	public int mass;
 	
-	private EZCircle virus;
+	private EZCircle virus, virusOutline;
 	
 	public Virus(int x, int y, int rad) {
 		this.x = x;
@@ -22,7 +22,7 @@ public class Virus {
 	}
 	
 	public int getVirusRad() {
-		return vShadow.getWidth() / 2;
+		return virusOutline.getWidth() / 2;
 	}
 	
 }
