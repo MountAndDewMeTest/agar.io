@@ -1,3 +1,31 @@
+/*
+ * Rules:
+ * 1. When the Player eats a DOT, increase Player's mass
+ * 2. When the Player collides with a BLOB:
+ *  - If the Player's mass < a Blob's mass, then the Player gets eaten by that Blob (Game Over)
+ *  - If the Player's mass > a Blob's mass, then the Player eats that Blob and increase Player's mass + that Blob's mass
+ * 3. When a Virus collides with a:
+ *   - Player:
+ *     * If the Player's mass < Virus's mass, then the Virus does nothing
+ *     * If the Player's mass > Virus's mass, then the Player's mass decreases
+ *   - Blob:
+ *     * If the Blob's mass < Virus's mass, then the Virus does nothing
+ *     * If the Blob's mass > Virus's mass, then the Player's mass decreases
+ * 4. When a BLOB eats a DOT, increase that BLOB's mass
+ * 5. When a BLOB collides with another BLOB:
+ *  - If the Blob's mass < the other Blob's mass, then the Blob gets eaten by the other Blob
+ *  - If the Blob's mass > the other Blob's mass, then the Blob eats that other Blob and increase the Blob's mass + that other Blob's mass
+ * 6.The game runs forever until:
+ *  - LOSE GAME: When the Player gets eaten by a BLOB or a VIRUS
+ *  - WIN GAME: When the Player has eaten all the other Blobs
+ */
+
+/*
+ * TODO: Code a better method for how the player follows the cursor
+ * TODO: Fix endGame() to properly restart the game
+ * TODO: Create an algorithm for better spawning system for blobs, dots, and viruses
+ * TODO: Create AI for Blob
+ */
 import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -6,96 +34,105 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Game {
-
 	//Screen Width and Height
-	public static GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-	public static final int SCREEN_WIDTH = gd.getDisplayMode().getWidth();
-	public static final int SCREEN_HEIGHT = gd.getDisplayMode().getHeight();
+	public GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	public final int SCREEN_WIDTH = gd.getDisplayMode().getWidth();
+	public final int SCREEN_HEIGHT = gd.getDisplayMode().getHeight();
 
-	//Create Objects
-	public static ArrayList<Blob> blobsArrayList = new ArrayList<Blob>();
-	public static ArrayList<Dot> dotsArrayList = new ArrayList<Dot>();
-	public static Player player;
-	public static Dot dot;
+	//Objects
+	private ArrayList<Blob> blobsArrayList = new ArrayList<Blob>();
+	private ArrayList<Dot> dotsArrayList = new ArrayList<Dot>();
+	private ArrayList<Virus> virusesArrayList = new ArrayList<Virus>();
+	
+	//Input Name
+	private EZText namePos;
+	private String playerName;
+	
+	//Game Loop Booleans
+	private boolean running = true;
+	private boolean gameLoop = true;
+	private String status = "";
 
-	public static EZText namePos;
-
-	//Constants
-	public static final int MAX_DOTS = 400; //Maximum amount of dots allowed on the screen
-
-	public static boolean running = true;
-	public static boolean game = true;
-	public static String status = "";
-
+	//End Game Elements
+	public EZRectangle endScreen, yesButton, noButton;
+	public EZText tryAgain, yesText, noText;
+	
+	//Timer Variables
+	private long startTime;
+	private long time;
+	
 	public static void main(String[] args) {
+		Game game = new Game();
+		game.init();
+	}
+
+	private void init() {
 		EZ.initialize(SCREEN_WIDTH, SCREEN_HEIGHT);
+		Menu menu = new Menu(SCREEN_WIDTH, SCREEN_HEIGHT);
+		menu.initialPhaseInteract();
+		
+		menu.drawFirstPhase();
+		playerName = getInputName(menu);
+		
+		menu.initiateSecondPhase();
+		menu.secondPhaseInteract();
+		
+		if(menu.thirdPhase) {
+			run();
+		}
+	}
+
+	private void run() {
 		drawGrid();
-		player = new Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-		namePos = inputSystem();
+		
+		Player player = new Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+		drawInputName(playerName);
+		
+		while(gameLoop) {
+			startTime = System.currentTimeMillis();
 
-		drawBlobs();
-
-		while(game) {
 			while(running) {
-				movePlayer();
+				movePlayer(player);
 				updateNamePos();
 				drawDots();
+				checkForBlobs();
+				
 				
 				//Player-Dot Collision
 				for(int i = 0; i < dotsArrayList.size(); i++) {
 					Dot eachDot;
-					if(player.isPlayerPointInElement(dotsArrayList.get(i).getDotXCenter(), dotsArrayList.get(i).getDotYCenter())) {
+					eachDot = dotsArrayList.get(i);
+
+					double distance = Math.hypot(Player.x - eachDot.x, Player.y - eachDot.y);
+
+					if(distance < Player.getRad() + Dot.DOT_RAD) {
 						eachDot = dotsArrayList.get(i);
 						eachDot.removeDot();
 						dotsArrayList.remove(eachDot);
 
-						Player.mass += dot.mass;
-						player.updatePlayer();
-						System.out.println(Player.mass);
+						Player.increaseMass(Dot.MASS);
+						Player.updatePlayer();
 					}
 				}
-
-				//Player-Blob Collision
-
-				//Player-Virus Collision
 
 				EZ.refreshScreen();
 			}
 		}
-
 	}
 
-	private static void movePlayer() {
-		Player.desX = EZInteraction.getXMouse();
-		Player.desY = EZInteraction.getYMouse();
-
-		player.move();
-	}
-
-	private static void drawBlobs() {
-		Random rand = new Random();
-		for(int i = 0; i < 3; i++) {
-			int x = rand.nextInt(SCREEN_WIDTH);
-			int y = rand.nextInt(SCREEN_HEIGHT);
-			int rad = rand.nextInt(30) + 20;
-			Blob blob = new Blob(x, y, rad);
-			blobsArrayList.add(blob);
-		}
-	}
-
-	private static void drawDots() {
+	private void drawDots() {
 		Random rand = new Random();
 
 		//Constantly populate the screen with dots until MAX_DOTS
-		if(dotsArrayList.size() < MAX_DOTS) {
+		if(dotsArrayList.size() < Dot.MAX_DOTS) {
 			int x = rand.nextInt(SCREEN_WIDTH);
 			int y = rand.nextInt(SCREEN_HEIGHT);
-			dot = new Dot(x, y);
+			Dot dot = new Dot(x, y);
 			dotsArrayList.add(dot);
 		}
 	}
 
-	private static void drawGrid() {
+	private void drawGrid() {
 		int x = 0; 
 		int y = 0; 
 		Color c = new Color(0, 0, 0, 70);
@@ -110,7 +147,20 @@ public class Game {
 			y += 20;
 		}
 	}
-	private static EZText inputSystem() {
+
+	private void movePlayer(Player player) {
+		Player.desX = EZInteraction.getXMouse();
+		Player.desY = EZInteraction.getYMouse();
+
+		player.move();
+	}
+
+	private void removePlayer() {
+		Player.remove();
+		EZ.removeEZElement(namePos);
+	}
+
+	private String getInputName(Menu menu) {
 
 		Scanner s = new Scanner(System.in); 
 
@@ -121,104 +171,51 @@ public class Game {
 			System.out.println("The name is too long! Must be 6 or less characters. Re-enter a new name:"); 
 			inputName = s.next(); 
 		}
-
-		System.out.println("Choose a color for the Player (case-sensitive): \n red (default) \n orange \n yellow \n green \n blue \n purple \n pink");
-		System.out.println("Color: ");
-		String inputColor;
-		inputColor = s.next();
-
-		Color c;
-		switch(inputColor) {
-		case "red":
-			c = new Color(255, 0, 0);
-			Player.c = c;
-			break;
-		case "orange":
-			c = new Color(255, 50, 0);
-			Player.c = c;
-			break;
-		case "yellow":
-			c = new Color(255, 255, 0);
-			Player.c = c;
-			break;
-		case "green":
-			c = new Color(0, 200, 0);
-			Player.c = c;
-			break;
-		case "blue":
-			c = new Color(0, 100, 200);
-			Player.c = c;
-			break;
-		case "purple":
-			c = new Color(100, 0, 200);
-			Player.c = c;
-			break;
-		case "pink":
-			c = new Color(255, 50, 200);
-			Player.c = c;
-			break;
-		default:
-			c = new Color(255, 0, 0); 
-			Player.c = c;
-			break;
-		}
-
 		s.close();
+		
+		menu.removeFirstPhase();
+		menu.secondPhase = true;
+		return inputName;
+	}
 
-		namePos = EZ.addText(player.getPlayerXCenter(), player.getPlayerYCenter(), "", Color.black);
+	private void drawInputName(String inputName) {
+		namePos = EZ.addText(Player.getPlayerXCenter(), Player.getPlayerYCenter(), "", Color.white);
 		namePos.setMsg(inputName);
-		return namePos;
 	}
 
-	private static void updateNamePos() {
-		namePos.translateTo(player.getPlayerXCenter(), player.getPlayerYCenter());
+	private void updateNamePos() {
+		namePos.translateTo(Player.getPlayerXCenter(), Player.getPlayerYCenter());
 		namePos.setFontSize((int)Player.mass / 4);
-		//namePos.pullToFront();
+		namePos.pullToFront();
 	}
 
-	private static void endGame() {
+	private void endGame(long duration) {
 		running = false;
 
-		EZRectangle endScreen = EZ.addRectangle(0, 0, 10000, 10000, new Color(0, 0, 0, 90), true);
+		getDurationAlive();
 
-		EZText tryAgain = EZ.addText(SCREEN_WIDTH / 2, (SCREEN_HEIGHT / 2) - 100, "Do you want to try again?", Color.white, 50);
-
+		endScreen = EZ.addRectangle(0, 0, 10000, 10000, new Color(0, 0, 0, 90), true);
+		tryAgain = EZ.addText(SCREEN_WIDTH / 2, (SCREEN_HEIGHT / 2) - 100, "Do you want to try again?", Color.white, 50);
+		
+		EZText timeAlive = EZ.addText(tryAgain.getXCenter(), tryAgain.getYCenter() - 150, "", Color.white, 60);
+		timeAlive.setMsg("You were alive for " + duration + " seconds!");
+				
 		if(status.equals("lose")) {
-			EZText lose = EZ.addText(tryAgain.getXCenter(), tryAgain.getYCenter() - 150, "YOU DIED", Color.white, 80);
+			EZ.addText(tryAgain.getXCenter(), tryAgain.getYCenter() - 250, "YOU DIED", Color.white, 80);
 		} else if (status.equals("win")) {
-			EZText win = EZ.addText(tryAgain.getXCenter(), tryAgain.getYCenter() - 150, "YOU WIN!", Color.white, 80);
+			EZ.addText(tryAgain.getXCenter(), tryAgain.getYCenter() - 250, "YOU WIN!", Color.white, 80);
 		}
 
-		EZRectangle yesButton = EZ.addRectangle((SCREEN_WIDTH / 2) - 300, SCREEN_HEIGHT / 2, 300, 100, Color.green, true);
-		EZRectangle noButton = EZ.addRectangle((SCREEN_WIDTH / 2) + 300, SCREEN_HEIGHT / 2, 300, 100, Color.red, true);
+		yesButton = EZ.addRectangle((SCREEN_WIDTH / 2) - 300, SCREEN_HEIGHT / 2, 300, 100, Color.green, true);
+		noButton = EZ.addRectangle((SCREEN_WIDTH / 2) + 300, SCREEN_HEIGHT / 2, 300, 100, Color.red, true);
 
-		EZText yesText = EZ.addText(yesButton.getXCenter(), yesButton.getYCenter(), "YES", Color.black, 50);
-		EZText noText = EZ.addText(noButton.getXCenter(), noButton.getYCenter(), "NO", Color.black, 50);
+		yesText = EZ.addText(yesButton.getXCenter(), yesButton.getYCenter(), "YES", Color.black, 50);
+		noText = EZ.addText(noButton.getXCenter(), noButton.getYCenter(), "NO", Color.black, 50);
+	}
 
-		System.out.println("Test1");
-		if(EZInteraction.wasMouseLeftButtonPressed()) {
-
-			System.out.println("Test2");
-			int clickX = EZInteraction.getXMouse();
-			int clickY = EZInteraction.getYMouse();
-
-			System.out.println("Test3");
-			if(yesButton.isPointInElement(clickX, clickY)) {
-
-				System.out.println("Test4");
-				endScreen.hide();
-				tryAgain.hide();
-				yesButton.hide();
-				noButton.hide();
-				yesText.hide();
-				noText.hide();
-
-				running = true;
-			} else if (noButton.isPointInElement(clickX, clickY)) {
-				EZ.removeAllEZElements();
-				game = false;
-				EZText exit = EZ.addText(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "GAME OVER", Color.red);
-			}
-		}
-	}	
+	private long getDurationAlive() {
+		long endTime = System.currentTimeMillis();
+		time = ((endTime - startTime) / 1000);
+		return time;
+	}
 }
