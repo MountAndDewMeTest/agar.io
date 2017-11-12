@@ -21,4 +21,8 @@ public class Virus {
 		
 	}
 	
+	public int getVirusRad() {
+		return vShadow.getWidth() / 2;
+	}
+	
 }
