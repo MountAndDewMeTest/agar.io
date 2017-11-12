@@ -2,28 +2,24 @@ import java.awt.Color;
 
 public class Player {
 	public static final int BORDER = 8;
-	public static final int MAX_MASS = 250;
+	public static final int MAX_MASS = 350;
 	public static final int PLAYER_RAD = 5;
 
-	public static int x;
-	public static int y;
-
+	public static int x, y;
 	public static Color c;
-	public static double mass;
+	public static int mass;
 	public static int desX = 0;
 	public static int desY = 0;
 
-	private static EZCircle p;
-	private static EZCircle pOutline; //Black border outline for the Player EZCircle
+	private static EZCircle p, pOutline;
 
 	public Player(int x, int y) {
 		Player.x = x;
 		Player.y = y;
 
 		mass = PLAYER_RAD * 2;
-
 		p = EZ.addCircle(x, y, PLAYER_RAD * 2,  PLAYER_RAD * 2,  c, true);
-		pOutline = EZ.addCircle(x, y, PLAYER_RAD * 2 + BORDER, PLAYER_RAD * 2 + BORDER, Color.black, true);
+		pOutline = EZ.addCircle(x, y, PLAYER_RAD * 2 + BORDER, PLAYER_RAD * 2 + BORDER, new Color(0, 0, 0, 0), true);
 		pOutline.pullToFront();
 		p.pullToFront();
 	}
@@ -34,7 +30,7 @@ public class Player {
 
 		float moveX = (float)(desX - x) / (float)mass;
 		float moveY = (float)(desY - y) / (float)mass;
-		
+
 		/*
 		 * desX and desY are values from EZInteraction.getXMouse() and EZInteraction.getYMouse(), respectively
 		 * Right now, when your mouse is outside the window screen, desX and desY return -1, 
@@ -48,45 +44,60 @@ public class Player {
 		}
 
 	}
+	
+	public static void increaseMass(int mass) {
+		Player.mass += mass;
+	}
+	
+	public static void decreaseMass(int mass) {
+		Player.mass -= mass;
+	}
+	
+	public static void updatePlayer() {
+		pOutline.setColor(c.darker());
 
-	public void updatePlayer() {
-		p.setWidth((int)mass);
-		p.setHeight((int)mass);
-		pOutline.setWidth((int)mass + BORDER);
-		pOutline.setHeight((int)mass + BORDER);
-		
-		//Temporary solution until we find a suitable way to smoothly increase Player's mass
 		if(Player.mass > MAX_MASS) {
 			Player.mass = MAX_MASS;
 		}
+
+		p.setWidth((int)mass);
+		p.setHeight((int)mass);
+
+		pOutline.setWidth((int)mass + BORDER);
+		pOutline.setHeight((int)mass + BORDER);
+
+		pOutline.pullToFront();
+		p.pullToFront();
 	}
 
-	public static void removePlayer() {
+	public static int getRad() {
+		return pOutline.getWidth() / 2;
+	}
+
+	public static int getPlayerXCenter() {
+		return p.getXCenter();
+	}
+
+	public static int getPlayerYCenter() {
+		return p.getYCenter();
+	}
+
+	public static void remove() {
 		EZ.removeEZElement(p);
 		EZ.removeEZElement(pOutline);
-		EZ.removeEZElement(Game.namePos);
 	}
-	
+
 	public static void hide() {
 		p.hide();
 		pOutline.hide();
 	}
-	
+
 	public static void show() {
 		p.show();
 		pOutline.show();
 	}
-	
-	public int getPlayerXCenter() {
-		return p.getXCenter();
-	}
 
-	public int getPlayerYCenter() {
-		return p.getYCenter();
-	}
-
-	public boolean isPlayerPointInElement(int x, int y) {
+	public static boolean isPlayerPointInElement(int x, int y) {
 		return p.isPointInElement(x, y);
 	}
-
 }
