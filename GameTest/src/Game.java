@@ -151,7 +151,7 @@ public class Game {
 		Random rand = new Random();
 		
 		//Adds in 10 randomly placed viruses
-		if(virusesArrayList.size() < Virus.MAX_VIRUS) {
+		for(int i = 0; i < Virus.MAX_VIRUS; i++) {
 			int x = rand.ints(180, SCREEN_WIDTH - 180).findFirst().getAsInt();
 			int y = rand.ints(180, SCREEN_HEIGHT - 180).findFirst().getAsInt();
 			int rad = rand.ints(50, 90).findFirst().getAsInt();
