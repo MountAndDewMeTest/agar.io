@@ -1,26 +1,21 @@
 import java.awt.Color;
+import java.util.Random;
 
 public class Menu {
 	public final int SCREEN_WIDTH, SCREEN_HEIGHT;
 	public final int circDiameter = 200;
 	public final int horizontalGap = 100;
 	
-	/*
-	 * Initial Phase: Overview Screen
-	 * First Phase: Telling the user to enter a user name
-	 * Second Phase: Telling the user to pick a color
-	 */
-	
-	public EZText title, titleShadow, playButtonText, howToPlayButtonText, creditsText;
-	public EZRectangle playButton;
-	public EZRectangle howToPlayButton;
-	public EZRectangle credits;	
+	private final int MAX_BACKGROUND_CIRCS = 40;
+	private EZText title, titleShadow, playButtonText, howToPlayButtonText, creditsText;
+	private EZRectangle playButton, howToPlayButton, credits, playButtonOutline, howToPlayButtonOutline, creditsOutline;
+	private EZCircle[] backgroundCircs = new EZCircle[MAX_BACKGROUND_CIRCS];
 	
 	public final boolean initialPhase = true;
 	public boolean initialPhaseBranchHowToPlay = false;
 	public boolean initialPhaseBranchCredits = false;
 	
-	public EZText enterUsername;
+	public EZText enterUsername, enterUsernameShadow;
 	
 	public EZCircle red, orange, yellow, green, blue, purple, pink;
 	public Color cRed, cOrange, cYellow, cGreen, cBlue, cPurple, cPink;
@@ -35,17 +30,39 @@ public class Menu {
 		this.SCREEN_HEIGHT = SCREEN_HEIGHT;
 		
 		drawInitialPhase();
+		/*
+		 * Initial Phase: Overview Screen
+		 * First Phase: Telling the user to enter a user name
+		 * Second Phase: Telling the user to pick a color
+		 * Third Phase: Run the game
+		 */
 	}
 	
-	//Create Menu Object (Game.java) -> getInputName(Game.java) -> firstPhase = true -> setColor() and draw() -> secondPhase = true -> Game Starts
 	public void drawInitialPhase() {
 		if(initialPhase) {
+			Random rand = new Random();
+			for(int i = 0; i < MAX_BACKGROUND_CIRCS; i++) {
+				int x = rand.nextInt(SCREEN_WIDTH);
+				int y = rand.nextInt(SCREEN_HEIGHT);
+				int rad = rand.ints(30, 125).findFirst().getAsInt();
+				
+				int r = rand.nextInt(255);
+				int g = rand.nextInt(255);
+				int b = rand.nextInt(255);
+				backgroundCircs[i] = EZ.addCircle(x, y, rad * 2, rad *2 , new Color(r, g, b), true);
+			}
+			
 			titleShadow = EZ.addText(SCREEN_WIDTH / 2 + 10, SCREEN_HEIGHT / 2 - 190, "", Color.black, 100);
 			title = EZ.addText(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 200, "", Color.blue, 100);
 			title.setFont("MarshyKate.ttf");
 			titleShadow.setFont("MarshyKate.ttf");
 			title.setMsg("bubble.ICS");
 			titleShadow.setMsg("bubble.ICS");
+			
+			final int BORDER = 8;
+			playButtonOutline =  EZ.addRectangle(200, SCREEN_HEIGHT - 500, 300 + BORDER, 100 + BORDER, Color.black, true);
+			howToPlayButtonOutline = EZ.addRectangle(200, SCREEN_HEIGHT - 350, 300 + BORDER, 100 + BORDER, Color.black, true);
+			creditsOutline = EZ.addRectangle(200, SCREEN_HEIGHT - 200, 300 + BORDER, 100 + BORDER, Color.black, true);
 			
 			playButton = EZ.addRectangle(200, SCREEN_HEIGHT - 500, 300, 100, Color.green, true);
 			howToPlayButton = EZ.addRectangle(200, SCREEN_HEIGHT - 350, 300, 100, Color.green, true);
@@ -84,6 +101,9 @@ public class Menu {
 		EZ.removeEZElement(playButton);
 		EZ.removeEZElement(howToPlayButton);
 		EZ.removeEZElement(credits);
+		EZ.removeEZElement(playButtonOutline);
+		EZ.removeEZElement(howToPlayButtonOutline);
+		EZ.removeEZElement(creditsOutline);
 		EZ.removeEZElement(playButtonText);
 		EZ.removeEZElement(howToPlayButtonText);
 		EZ.removeEZElement(creditsText);
@@ -92,6 +112,11 @@ public class Menu {
 	public void drawFirstPhase() {
 		if(firstPhase) {
 			removeInitialPhase();
+			final int SHADOW_OFFSET = 4;
+			enterUsernameShadow = EZ.addText(SCREEN_WIDTH / 2 + SHADOW_OFFSET, SCREEN_HEIGHT / 2 + SHADOW_OFFSET, "", new Color(0, 0, 0, 150), 60);
+			enterUsernameShadow.setFont("MarshyKate.ttf");
+			enterUsernameShadow.setMsg("ENTER A USERNAME IN THE CONSOLE!");
+			
 			enterUsername = EZ.addText(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "", Color.red, 60);
 			enterUsername.setFont("MarshyKate.ttf");
 			enterUsername.setMsg("ENTER A USERNAME IN THE CONSOLE!");
@@ -100,6 +125,10 @@ public class Menu {
 	
 	public void removeFirstPhase() {
 		EZ.removeEZElement(enterUsername);
+		EZ.removeEZElement(enterUsernameShadow);
+		for(int i = 0; i < MAX_BACKGROUND_CIRCS; i++) {
+			EZ.removeEZElement(backgroundCircs[i]);
+		}
 	}
 	
 	public void initiateSecondPhase() {
