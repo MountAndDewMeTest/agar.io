@@ -88,6 +88,8 @@ public class Game {
 		Player player = new Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 		drawInputName(playerName);
 		
+		drawVirus();
+		
 		while(gameLoop) {
 			startTime = System.currentTimeMillis();
 
@@ -95,9 +97,6 @@ public class Game {
 				movePlayer(player);
 				updateNamePos();
 				drawDots();
-				drawVirus();
-				checkForBlobs();
-				
 				
 				//Player-Dot Collision
 				for(int i = 0; i < dotsArrayList.size(); i++) {
@@ -106,7 +105,7 @@ public class Game {
 
 					double distance = Math.hypot(Player.x - eachDot.x, Player.y - eachDot.y);
 
-					if(distance < Player.getRad() + Dot.DOT_RAD) {
+					if(distance < Player.getPlayerRad() + Dot.DOT_RAD) {
 						eachDot = dotsArrayList.get(i);
 						eachDot.removeDot();
 						dotsArrayList.remove(eachDot);
@@ -123,9 +122,9 @@ public class Game {
 
 					double distance = Math.hypot(Player.x - eachVirus.x, Player.y - eachVirus.y);
 
-					if(distance < Player.PLAYER_RAD + Virus.rad && Player.mass > Virus.mass) {
+					if(distance < Player.getPlayerRad() + Virus.getVirusRad() && Player.mass > eachVirus.mass) {
 						
-						Player.mass -= 1;
+						Player.decreaseMass(10);
 						Player.updatePlayer();
 					}
 					
@@ -153,9 +152,9 @@ public class Game {
 		
 		//Adds in 10 randomly placed viruses
 		if(virusesArrayList.size() < Virus.MAX_VIRUS) {
-			int x = rand.nextInt(SCREEN_WIDTH);
-			int y = rand.nextInt(SCREEN_HEIGHT);
-			int rad = 30;
+			int x = rand.ints(180, SCREEN_WIDTH - 180).findFirst().getAsInt();
+			int y = rand.ints(180, SCREEN_HEIGHT - 180).findFirst().getAsInt();
+			int rad = rand.ints(50, 90).findFirst().getAsInt();
 			Virus virus = new Virus(x, y, rad);
 			virusesArrayList.add(virus);
 		}
