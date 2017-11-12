@@ -122,7 +122,7 @@ public class Game {
 
 					double distance = Math.hypot(Player.x - eachVirus.x, Player.y - eachVirus.y);
 
-					if(distance < Player.getPlayerRad() + Virus.getVirusRad() && Player.mass > eachVirus.mass) {
+					if(distance < Player.getPlayerRad() + eachVirus.getVirusRad() && Player.mass > eachVirus.mass) {
 						
 						Player.decreaseMass(10);
 						Player.updatePlayer();
