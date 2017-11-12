@@ -95,6 +95,7 @@ public class Game {
 				movePlayer(player);
 				updateNamePos();
 				drawDots();
+				drawVirus();
 				checkForBlobs();
 				
 				
@@ -114,6 +115,21 @@ public class Game {
 						Player.updatePlayer();
 					}
 				}
+				
+				//Player-Virus Collision
+				for(int i = 0; i < virusesArrayList.size(); i++) {
+					Virus eachVirus;
+					eachVirus = virusesArrayList.get(i);
+
+					double distance = Math.hypot(Player.x - eachVirus.x, Player.y - eachVirus.y);
+
+					if(distance < Player.PLAYER_RAD + Virus.rad && Player.mass > Virus.mass) {
+						
+						Player.mass -= 1;
+						Player.updatePlayer();
+					}
+					
+				}
 
 				EZ.refreshScreen();
 			}
@@ -129,6 +145,19 @@ public class Game {
 			int y = rand.nextInt(SCREEN_HEIGHT);
 			Dot dot = new Dot(x, y);
 			dotsArrayList.add(dot);
+		}
+	}
+	
+	private void drawVirus() {
+		Random rand = new Random();
+		
+		//Adds in 10 randomly placed viruses
+		if(virusesArrayList.size() < Virus.MAX_VIRUS) {
+			int x = rand.nextInt(SCREEN_WIDTH);
+			int y = rand.nextInt(SCREEN_HEIGHT);
+			int rad = 30;
+			Virus virus = new Virus(x, y, rad);
+			virusesArrayList.add(virus);
 		}
 	}
 
