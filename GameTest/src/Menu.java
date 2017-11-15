@@ -2,9 +2,8 @@ import java.awt.Color;
 import java.util.Random;
 
 public class Menu {
-	private final int SCREEN_WIDTH, SCREEN_HEIGHT;
-	private final int halfScreenWidth;
-	private final int halfScreenHeight;
+	public final int SCREEN_WIDTH, SCREEN_HEIGHT;
+	public final int halfScreenWidth, halfScreenHeight;
 	private final int circDiameter = 200;
 	private final int horizontalGap = 100;
 
@@ -28,6 +27,7 @@ public class Menu {
 	private EZText creditsScreenTitle;
 
 	//Initial Phase - Options Branch Elements
+	Options options;
 
 	//First Phase Elements
 	public EZText enterUsername, enterUsernameShadow;
@@ -53,13 +53,14 @@ public class Menu {
 		this.SCREEN_HEIGHT = SCREEN_HEIGHT;
 		this.halfScreenWidth = this.SCREEN_WIDTH / 2;
 		this.halfScreenHeight = this.SCREEN_HEIGHT / 2;
-
+		
+		options = new Options(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
 		drawInitialPhase();
 	}
 
 	public void drawReturnToMenu() {
-		backOutline = EZ.addRectangle(200, 200, 250 + BORDER, 100 + BORDER, Color.black, true);
-		backButton = EZ.addRectangle(200, 200, 250, 100, Color.green, true);
+		backOutline = EZ.addRectangle(100, 100, 150 + BORDER, 100 + BORDER, Color.black, true);
+		backButton = EZ.addRectangle(100, 100, 150, 100, Color.green, true);
 		backText = EZ.addText(backButton.getXCenter(), backButton.getYCenter(), "Back", Color.black, 30);
 
 		returnToMenuInteract();
@@ -100,7 +101,36 @@ public class Menu {
 		EZ.removeEZElement(creditsScreenTitle);
 
 		//initialPhaseBranchOptions Elements
-
+		EZ.removeEZElement(options.optionsScreen);
+		EZ.removeEZElement(options.optionsScreenOutline);
+		EZ.removeEZElement(options.optionsScreenTitle);
+		
+		EZ.removeEZElement(options.maxDots);
+		EZ.removeEZElement(options.maxBlobs);
+		EZ.removeEZElement(options.maxViruses);
+		EZ.removeEZElement(options.maxPlayerMass);
+		EZ.removeEZElement(options.maxBlobMass);
+		EZ.removeEZElement(options.dotMass);
+		
+		EZ.removeEZElement(options.maxDotsVal);
+		EZ.removeEZElement(options.maxBlobsVal);
+		EZ.removeEZElement(options.maxVirusesVal);
+		EZ.removeEZElement(options.maxPlayerMassVal);
+		EZ.removeEZElement(options.maxBlobMassVal);
+		EZ.removeEZElement(options.dotMassVal);
+		
+		EZ.removeEZElement(options.down1);
+		EZ.removeEZElement(options.down2);
+		EZ.removeEZElement(options.down3);
+		EZ.removeEZElement(options.down4);
+		EZ.removeEZElement(options.down5);
+		EZ.removeEZElement(options.down6);
+		EZ.removeEZElement(options.up1);
+		EZ.removeEZElement(options.up2);
+		EZ.removeEZElement(options.up3);
+		EZ.removeEZElement(options.up4);
+		EZ.removeEZElement(options.up5);
+		EZ.removeEZElement(options.up6);
 	}
 
 	public void drawInitialPhase() {
@@ -169,6 +199,9 @@ public class Menu {
 		}
 	}
 
+	/**
+	 * Hides the elements of initial phase
+	 */
 	public void hideInitialPhase() {
 		title.hide();
 		playButton.hide();
@@ -255,6 +288,8 @@ public class Menu {
 	public void drawInitialPhaseBranchOptions() {
 		if(initialPhaseBranchOptions) {
 			hideInitialPhase();
+			options.drawDefaultButton();
+			options.drawOptions();
 			drawReturnToMenu();
 		}
 	}
@@ -327,37 +362,37 @@ public class Menu {
 				if(red.isPointInElement(x, y)) {
 					Player.c = cRed;
 					thirdPhase = true;
-					removeElements();
+					removeSecondPhaseElements();
 					break;
 				} else if(orange.isPointInElement(x, y)) {
 					Player.c = cOrange;
 					thirdPhase = true;
-					removeElements();
+					removeSecondPhaseElements();
 					break;
 				} else if(yellow.isPointInElement(x, y)) {
 					Player.c = cYellow;
 					thirdPhase = true;
-					removeElements();
+					removeSecondPhaseElements();
 					break;
 				} else if(green.isPointInElement(x, y)) {
 					Player.c = cGreen;
 					thirdPhase = true;
-					removeElements();
+					removeSecondPhaseElements();
 					break;
 				} else if(blue.isPointInElement(x, y)) {
 					Player.c = cBlue;
 					thirdPhase = true;
-					removeElements();
+					removeSecondPhaseElements();
 					break;
 				} else if(purple.isPointInElement(x, y)) {
 					Player.c = cPurple;
 					thirdPhase = true;
-					removeElements();
+					removeSecondPhaseElements();
 					break;
 				} else if(pink.isPointInElement(x, y)) {
 					Player.c = cPink;
 					thirdPhase = true;
-					removeElements();
+					removeSecondPhaseElements();
 					break;
 				}
 			}
@@ -365,7 +400,7 @@ public class Menu {
 		}
 	}
 
-	public void removeElements() {
+	public void removeSecondPhaseElements() {
 		EZ.removeEZElement(chooseColor);
 		EZ.removeEZElement(red);
 		EZ.removeEZElement(orange);
